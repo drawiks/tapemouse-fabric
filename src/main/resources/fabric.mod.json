@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "tapemouse-fabric",
+	"version": "${version}",
+	"name": "TapeMouse Fabric",
+	"description": "Client-side keybinding macro. Repeatedly presses any vanilla keybinding on a tick delay so you can keep farming, boating or walking while the window is unfocused. Commands only, no GUI.",
+	"authors": [
+		"drawiks"
+	],
+	"contact": {
+		"sources": "https://github.com/drawiks/tapemouse-fabric"
+	},
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"io.github.drawiks.tapemouse.TapeMouseClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"tapemouse.command.off": "TapeMouse off",
+	"tapemouse.command.keybindlist": "Keybindings:",
+	"tapemouse.command.set": "TapeMouse will press '%s' (%s) every %s ticks.",
+	"tapemouse.command.unknownkey": "'%s' is not a valid keybinding. Use /tapemouse list."
+}
