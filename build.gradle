@@ -52,6 +52,14 @@ jar {
 	exclude 'io/github/drawiks/tapemouse/TapeMouseSelfCheck.class'
 }
 
+tasks.register('selfCheck', JavaExec) {
+	group = 'verification'
+	description = 'Runs the delay counter self-check.'
+	enableAssertions = true
+	classpath = sourceSets.main.runtimeClasspath
+	mainClass = 'io.github.drawiks.tapemouse.TapeMouseSelfCheck'
+}
+
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
