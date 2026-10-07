@@ -1,0 +1,70 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+# required for `gh release create`
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # full history, otherwise --generate-notes has nothing to summarise
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x ./gradlew
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # tags win; anything else builds the next unreleased version as a snapshot
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$(sed -n 's/^mod_version=//p' gradle.properties)-SNAPSHOT" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Self-check
+        run: ./gradlew selfCheck -Pmod_version=${{ steps.version.outputs.value }}
+
+      - name: Build
+        run: ./gradlew build -Pmod_version=${{ steps.version.outputs.value }}
+
+      # explicit path: the *-sources.jar matches a looser glob and must not ship
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tapemouse-fabric-${{ steps.version.outputs.value }}
+          path: build/libs/tapemouse-fabric-${{ steps.version.outputs.value }}.jar
+          if-no-files-found: error
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            "build/libs/tapemouse-fabric-${{ steps.version.outputs.value }}.jar"
